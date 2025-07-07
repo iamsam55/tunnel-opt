@@ -1,49 +1,48 @@
 #!/bin/bash
-echo "🔧 اجرای بهینه‌سازی شبکه برای تونل VPN/V2Ray..."
+echo "🔧 Running tunnel optimization script for VPN/V2Ray..."
 
-# فعال‌سازی BBR
-echo "👉 فعال‌سازی BBR..."
+# Enable BBR
+echo "👉 Enabling BBR..."
 echo "net.core.default_qdisc = fq" | tee -a /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control = bbr" | tee -a /etc/sysctl.conf
 
-# تشخیص کارت شبکه
+# Detect network interface
 IFACE=$(ip route | grep default | awk '{print $5}')
 if [ -z "$IFACE" ]; then
-  echo "❌ کارت شبکه پیش‌فرض پیدا نشد. ادامه ممکن نیست."
+  echo "❌ Default network interface not found. Exiting."
   exit 1
 fi
 
-# دریافت مقدار MTU از کاربر
-read -p "💬 مقدار MTU را وارد کنید (پیش‌فرض: 1400): " CUSTOM_MTU
+# Ask user for MTU value
+read -p "💬 Enter MTU value (default is 1400): " CUSTOM_MTU
 MTU=${CUSTOM_MTU:-1400}
 
-# تنظیم MTU
+# Set MTU
 ip link set dev "$IFACE" mtu "$MTU"
-echo "👉 MTU برای کارت شبکه $IFACE روی $MTU تنظیم شد."
+echo "👉 MTU for interface $IFACE set to $MTU."
 
-# سایر تنظیمات TCP
+# Other TCP optimizations
 echo "net.ipv4.tcp_timestamps = 0" | tee -a /etc/sysctl.conf
 echo "net.ipv4.tcp_fastopen = 3" | tee -a /etc/sysctl.conf
 echo "net.ipv4.tcp_fin_timeout = 15" | tee -a /etc/sysctl.conf
 echo "net.ipv4.tcp_keepalive_time = 120" | tee -a /etc/sysctl.conf
 
-# اعمال تنظیمات
+# Apply sysctl settings
 sysctl -p > /dev/null
 
-# پاک‌سازی کش مسیر
+# Clear route cache
 ip route flush cache
 
-# بررسی BBR
+# Check if BBR is active
 echo ""
 sysctl net.ipv4.tcp_congestion_control
-lsmod | grep bbr && echo "✅ BBR فعال است." || echo "⚠️ BBR فعال نیست."
+lsmod | grep bbr && echo "✅ BBR is active." || echo "⚠️ BBR is not active."
 
-# پیشنهاد ریبوت
+# Ask for reboot
 echo ""
-read -p "🔁 آیا می‌خواهید سرور را ریبوت کنید؟ (y/n): " REBOOT_ANSWER
+read -p "🔁 Do you want to reboot the server now? (y/n): " REBOOT_ANSWER
 if [[ "$REBOOT_ANSWER" == "y" || "$REBOOT_ANSWER" == "Y" ]]; then
-  echo "♻️ در حال ریبوت سرور..."
+  echo "♻️ Rebooting the server..."
   reboot
 else
-  echo "✅ تنظیمات انجام شد. ریبوت به تعویق افتاد."
-fi
+  echo "✅ Optimizat
