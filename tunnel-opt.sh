@@ -45,4 +45,5 @@ if [[ "$REBOOT_ANSWER" == "y" || "$REBOOT_ANSWER" == "Y" ]]; then
   echo "♻️ Rebooting the server..."
   reboot
 else
-  echo "✅ Optimizat
+  echo "✅ Optimization complete. Reboot skipped."
+fi
