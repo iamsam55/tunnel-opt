@@ -3,8 +3,8 @@ echo "🔧 Running tunnel optimization script for VPN/V2Ray..."
 
 # Enable BBR
 echo "👉 Enabling BBR..."
-echo "net.core.default_qdisc = fq" | tee -a /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control = bbr" | tee -a /etc/sysctl.conf
+echo "net.core.default_qdisc = fq" | sudo tee -a /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control = bbr" | sudo tee -a /etc/sysctl.conf
 
 # Detect network interface
 IFACE=$(ip route | grep default | awk '{print $5}')
@@ -22,18 +22,18 @@ ip link set dev "$IFACE" mtu "$MTU"
 echo "👉 MTU for interface $IFACE set to $MTU."
 
 # Other TCP optimizations
-echo "net.ipv4.tcp_timestamps = 0" | tee -a /etc/sysctl.conf
-echo "net.ipv4.tcp_fastopen = 3" | tee -a /etc/sysctl.conf
-echo "net.ipv4.tcp_fin_timeout = 15" | tee -a /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_time = 120" | tee -a /etc/sysctl.conf
+echo "net.ipv4.tcp_timestamps = 0" | sudo tee -a /etc/sysctl.conf
+echo "net.ipv4.tcp_fastopen = 3" | sudo tee -a /etc/sysctl.conf
+echo "net.ipv4.tcp_fin_timeout = 15" | sudo tee -a /etc/sysctl.conf
+echo "net.ipv4.tcp_keepalive_time = 120" | sudo tee -a /etc/sysctl.conf
 
-# Apply sysctl settings
-sysctl -p > /dev/null
+# Apply settings
+sudo sysctl -p > /dev/null
 
 # Clear route cache
 ip route flush cache
 
-# Check if BBR is active
+# Check BBR
 echo ""
 sysctl net.ipv4.tcp_congestion_control
 lsmod | grep bbr && echo "✅ BBR is active." || echo "⚠️ BBR is not active."
